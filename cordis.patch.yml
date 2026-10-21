@@ -1,0 +1,4 @@
+# Usage Pulse is a host bundle with one client entry.
+- insert:
+    - id: usage-pulse
+      name: 'dsh-plugin-usage-pulse'

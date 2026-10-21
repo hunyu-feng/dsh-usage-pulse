@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "峰谷用量",
+    "description": "在输入框下方实时显示 DeepSeek 峰谷价格状态、token 用量与分时用量统计。"
+  }
+}

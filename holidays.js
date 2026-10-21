@@ -1,0 +1,36 @@
+// Chinese statutory holidays (Beijing dates, all day off-peak for DeepSeek).
+//
+// Peak hours are defined by DeepSeek as Beijing time Mon-Fri 09:00-12:00 and
+// 14:00-18:00, "excluding Chinese statutory holidays". Every other moment
+// (nights, weekends, and holiday days) is off-peak, and off-peak prices are
+// exactly half of peak prices.
+//
+// Sources:
+//   2025: https://www.gov.cn/zhengce/content/202411/content_6986382.htm
+//   2026: https://www.gov.cn/zhengce/content/202511/content_7047090.htm
+// The State Council usually publishes the next year's arrangement in the
+// preceding November - add the new list then (a stale list only mislabels
+// holiday days, it never corrupts usage data).
+
+export const HOLIDAYS = new Set([
+  // 2025
+  '2025-01-01',
+  '2025-01-28', '2025-01-29', '2025-01-30', '2025-01-31',
+  '2025-02-01', '2025-02-02', '2025-02-03', '2025-02-04',
+  '2025-04-04', '2025-04-05', '2025-04-06',
+  '2025-05-01', '2025-05-02', '2025-05-03', '2025-05-04', '2025-05-05',
+  '2025-05-31', '2025-06-01', '2025-06-02',
+  '2025-10-01', '2025-10-02', '2025-10-03', '2025-10-04',
+  '2025-10-05', '2025-10-06', '2025-10-07', '2025-10-08',
+
+  // 2026
+  '2026-01-01', '2026-01-02', '2026-01-03',
+  '2026-02-15', '2026-02-16', '2026-02-17', '2026-02-18',
+  '2026-02-19', '2026-02-20', '2026-02-21', '2026-02-22', '2026-02-23',
+  '2026-04-04', '2026-04-05', '2026-04-06',
+  '2026-05-01', '2026-05-02', '2026-05-03', '2026-05-04', '2026-05-05',
+  '2026-06-19', '2026-06-20', '2026-06-21',
+  '2026-09-25', '2026-09-26', '2026-09-27',
+  '2026-10-01', '2026-10-02', '2026-10-03', '2026-10-04',
+  '2026-10-05', '2026-10-06', '2026-10-07',
+]);
