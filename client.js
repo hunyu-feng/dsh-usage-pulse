@@ -8,7 +8,7 @@
 //   GET /usage-pulse/api/snapshot?sessionId=<id>
 
 window.__ModuleLoader__.load({
-  id: 'dsh-plugin-usage-pulse',
+  id: 'dsh-usage-pulse',
   factory(require) {
     const React = require('react');
     const { useEffect, useRef, useState } = React;

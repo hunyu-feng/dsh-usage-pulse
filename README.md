@@ -1,5 +1,7 @@
 # Usage Pulse · 峰谷用量
 
+> 本地开发备忘（怎么改、改完怎么生效、踩过的坑）：见 [NOTES.md](./NOTES.md)。
+
 A DSH Web UI plugin that keeps DeepSeek's **peak / off-peak pricing**, your **token spend** and your
 **hourly usage** visible right below the composer — updated live, no page reload.
 
@@ -59,7 +61,7 @@ This repository is a DSH plugin bundle: `package.json` declares the `dsh.bundle`
 
 ```bash
 # once the entry is listed in the community catalog
-dsh plugin add hunyu-feng/dsh-plugin-usage-pulse
+dsh plugin add hunyu-feng/dsh-usage-pulse
 ```
 
 For a local checkout, point the DSH plugin manager at the directory containing `package.json`

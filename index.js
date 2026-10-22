@@ -7,6 +7,10 @@
 //
 // The aggregate is intentionally small (hourly buckets + per-session totals),
 // never the conversation itself: no prompt or completion content is stored.
+//
+// Runtime ids are deliberately stable across the package rename (entry id
+// `usage-pulse`, route `/usage-pulse/api/snapshot`, data dir ~/.dsh-usage-pulse).
+// Local development notes: see NOTES.md in the package root.
 
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { homedir } from 'node:os';
