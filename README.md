@@ -12,6 +12,9 @@ A DSH Web UI plugin that keeps DeepSeek's **peak / off-peak pricing**, your **to
 - **Live regime badge** — `峰时` / `谷时 5 折` with a countdown to the next price switch, computed in
   Beijing time (`Asia/Shanghai`), including Chinese statutory holidays (peak is Mon–Fri 09:00–12:00
   and 14:00–18:00, holidays and weekends are always off-peak).
+- **When the cheap window starts** — the expando shows the next off-peak window (`下一谷段 今天 12:00
+  开始 · 4 小时后`) and when the current segment began, and while peak is running the pill itself shows
+  `谷段 12:00 起`.
 - **Today at a glance** — today's spend in CNY plus total tokens, refreshed every 5 seconds.
 - **Session breakdown** — expand the pill to see this session's requests, tokens and cost, plus the
   cache-hit / cache-miss / output split and how much of today's spend happened in peak vs off-peak
@@ -55,8 +58,7 @@ This repository is a DSH plugin bundle: `package.json` declares the `dsh.bundle`
 `cordis.patch.yml` inserts the plugin, so it installs the same way as any other plugin.
 
 ```bash
-# once this repository is listed in the community catalog
-dsh plugin add <owner>/dsh-plugin-usage-pulse
+dsh plugin add onfzi/dsh-plugin-usage-pulse
 ```
 
 For a local checkout, point the DSH plugin manager at the directory containing `package.json`

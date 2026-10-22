@@ -26,6 +26,16 @@ window.__ModuleLoader__.load({
         left: '{time} left',
         toPeak: 'until peak',
         toOff: 'until off-peak',
+        nextOff: 'Next off-peak',
+        startsAt: '{when}',
+        startsIn: 'in {time}',
+        segSince: 'This segment since {when}',
+        offFrom: 'off-peak {clock}',
+        dayToday: 'today',
+        dayTomorrow: 'tomorrow',
+        dayAfter: 'in 2 days',
+        dayYesterday: 'yesterday',
+        dayBefore: '2 days ago',
         tomorrow: 'tomorrow',
         today: 'Today',
         todayTokens: 'Tokens',
@@ -60,6 +70,16 @@ window.__ModuleLoader__.load({
         left: '剩 {time}',
         toPeak: '后转峰时',
         toOff: '后转谷时',
+        nextOff: '下一谷段',
+        startsAt: '{when} 开始',
+        startsIn: '{time} 后',
+        segSince: '本段自 {when} 起',
+        offFrom: '谷段 {clock} 起',
+        dayToday: '今天',
+        dayTomorrow: '明天',
+        dayAfter: '后天',
+        dayYesterday: '昨天',
+        dayBefore: '前天',
         tomorrow: '明天',
         today: '今日',
         todayTokens: '今日 tokens',
@@ -109,6 +129,10 @@ window.__ModuleLoader__.load({
 .up-chevron{color:var(--dsw-alias-label-tertiary);font-size:9px;transform:rotate(0deg);transition:transform .15s ease}
 .up-pill[data-open='true'] .up-chevron{transform:rotate(180deg)}
 .up-hint{color:var(--dsw-alias-label-tertiary)}
+.up-nextoff{display:flex;align-items:baseline;gap:6px;margin:0 0 8px;padding:5px 8px;border-radius:8px;background:var(--dsw-alias-bg-layer-2);font-size:11px;color:var(--dsw-alias-label-secondary);min-width:0}
+.up-nextoff-label{color:var(--dsw-alias-label-tertiary);white-space:nowrap;flex:0 0 auto}
+.up-nextoff-value{color:var(--dsw-alias-label-primary);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.up-nextoff-in{margin-left:auto;padding-left:6px;color:var(--dsw-alias-label-tertiary);font-variant-numeric:tabular-nums;white-space:nowrap}
 .up-panel{width:min(360px,100%);padding:10px 12px 11px;border:1px solid var(--dsw-alias-border-l1);border-radius:12px;background:var(--dsw-alias-bg-layer-1);box-shadow:0 8px 24px rgba(0,0,0,.12)}
 .up-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px}
 .up-head-title{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--dsw-alias-label-primary);white-space:nowrap}
@@ -197,6 +221,80 @@ window.__ModuleLoader__.load({
     function shortModel(model) {
       const text = String(model || '');
       return text ? text.replace(/^deepseek-/, '') : '';
+    }
+
+    /* -------------------------------------------------------- clock/regime */
+
+    const HOUR = 3600000;
+    const DAY = 86400000;
+    const BJ = 8 * HOUR;
+
+    function pad2(value) {
+      return String(value).padStart(2, '0');
+    }
+
+    function bjMidnight(ms) {
+      const date = new Date(ms + BJ);
+      return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()) - BJ;
+    }
+
+    function approxIsPeak(ms) {
+      const date = new Date(ms + BJ);
+      const weekday = date.getUTCDay();
+      const hour = date.getUTCHours();
+      return weekday !== 0 && weekday !== 6 && ((hour >= 9 && hour < 12) || (hour >= 14 && hour < 18));
+    }
+
+    function firstAt(now, wantPeak) {
+      const base = bjMidnight(now);
+      for (let offset = 0; offset <= 10; offset += 1) {
+        for (const hour of [0, 9, 12, 14, 18]) {
+          const at = base + offset * DAY + hour * HOUR;
+          if (at <= now) continue;
+          if (approxIsPeak(at) === wantPeak) return at;
+        }
+      }
+      return now + HOUR;
+    }
+
+    /** Weekday-only approximation; the host answer (holiday aware) wins when present. */
+    function approxNextOff(now) {
+      if (approxIsPeak(now)) return firstAt(now, false);
+      return firstAt(firstAt(now, true), false);
+    }
+
+    function bjClock(ms) {
+      const date = new Date(ms + BJ);
+      return `${pad2(date.getUTCHours())}:${pad2(date.getUTCMinutes())}`;
+    }
+
+    function bjDayOffset(at, now) {
+      return Math.round((bjMidnight(at) - bjMidnight(now)) / DAY);
+    }
+
+    function whenText(clock, dayOffset, date, t) {
+      const day =
+        dayOffset === 0 ? t('dayToday')
+          : dayOffset === 1 ? t('dayTomorrow')
+            : dayOffset === 2 ? t('dayAfter')
+              : dayOffset === -1 ? t('dayYesterday')
+                : dayOffset === -2 ? t('dayBefore')
+                  : date ? shortDate(date) : '';
+      return day ? `${day} ${clock}` : String(clock);
+    }
+
+    function normalizeNextOff(regime, now) {
+      const given = regime && regime.nextOff;
+      if (given && Number.isFinite(Number(given.at))) {
+        return {
+          at: Number(given.at),
+          clock: given.clock || bjClock(Number(given.at)),
+          dayOffset: Number.isFinite(Number(given.dayOffset)) ? Number(given.dayOffset) : 0,
+          date: given.date || '',
+        };
+      }
+      const at = approxNextOff(now);
+      return { at, clock: bjClock(at), dayOffset: bjDayOffset(at, now), date: '' };
     }
 
     function makeTranslate(getTranslate) {
@@ -386,6 +484,10 @@ window.__ModuleLoader__.load({
       else if (regime.nextDayOffset > 1) nextPrefix = `${shortDate(regime.nextDate)} `;
       const nextText = `${nextPrefix}${regime.nextClock} ${regime.nextPeak ? t('toPeak') : t('toOff')}`;
       const regimeText = regime.peak ? t('peak') : t('off');
+      const nextOff = normalizeNextOff(regime, now);
+      const nextOffText = whenText(nextOff.clock, nextOff.dayOffset, nextOff.date, t);
+      const segment = regime.segment || null;
+      const segmentText = segment ? whenText(segment.clock, segment.dayOffset, segment.date, t) : '';
 
       return h(
         'section',
@@ -404,7 +506,15 @@ window.__ModuleLoader__.load({
             { className: 'up-head-sub' },
             h('div', null, nextText),
             h('div', null, t('left', { time: fmtDuration(regime.until - now) })),
+            segmentText ? h('div', null, t('segSince', { when: segmentText })) : null,
           ),
+        ),
+        h(
+          'div',
+          { className: 'up-nextoff' },
+          h('span', { className: 'up-nextoff-label' }, t('nextOff')),
+          h('span', { className: 'up-nextoff-value' }, t('startsAt', { when: nextOffText })),
+          h('span', { className: 'up-nextoff-in' }, t('startsIn', { time: fmtDuration(nextOff.at - now) })),
         ),
         h(
           'div',
@@ -481,6 +591,7 @@ window.__ModuleLoader__.load({
       const regime = snapshot ? snapshot.regime : null;
       const today = snapshot && snapshot.today ? snapshot.today : null;
       const remaining = regime ? regime.until - now : 0;
+      const nextOff = regime ? normalizeNextOff(regime, now) : null;
 
       let regimeText = t('label');
       if (regime) regimeText = regime.peak ? t('peak') : t('off');
@@ -497,6 +608,19 @@ window.__ModuleLoader__.load({
       if (regime && !regime.peak) pillChildren.push(h('span', { className: 'up-discount', key: 'discount' }, t('discount')));
       if (regime) {
         pillChildren.push(h('span', { className: 'up-countdown', key: 'countdown' }, t('left', { time: fmtDuration(remaining) })));
+        if (regime.peak && nextOff) {
+          pillChildren.push(
+            h(
+              'span',
+              {
+                className: 'up-hint',
+                key: 'nextoff',
+                title: `${t('nextOff')} ${whenText(nextOff.clock, nextOff.dayOffset, nextOff.date, t)}`,
+              },
+              t('offFrom', { clock: nextOff.clock }),
+            ),
+          );
+        }
         pillChildren.push(h('span', { className: 'up-sep', key: 'sep' }));
         pillChildren.push(h('span', { className: 'up-money', key: 'money' }, fmtMoney(today ? today.cny : 0)));
         pillChildren.push(h('span', { className: 'up-tokens', key: 'tokens' }, fmtTokens(today ? today.tokens : 0)));

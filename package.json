@@ -1,11 +1,19 @@
 {
   "name": "dsh-plugin-usage-pulse",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Real-time DeepSeek peak / off-peak pricing, token usage and hourly usage meter for the DSH Web UI.",
   "private": true,
   "type": "module",
   "license": "MIT",
   "author": "wang7",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/onfzi/dsh-plugin-usage-pulse.git"
+  },
+  "homepage": "https://github.com/onfzi/dsh-plugin-usage-pulse#readme",
+  "bugs": {
+    "url": "https://github.com/onfzi/dsh-plugin-usage-pulse/issues"
+  },
   "keywords": [
     "dsh-plugin",
     "token-usage",

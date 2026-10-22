@@ -133,6 +133,46 @@ function nextTransition(now) {
   return { at: now + HOUR, peak: !current };
 }
 
+/** First instant strictly after `now` at which the regime is `wantPeak`. */
+function nextRegimeAt(now, wantPeak) {
+  const base = dayStart(now);
+  for (let offset = 0; offset <= 10; offset += 1) {
+    const day = base + offset * DAY;
+    for (const hour of [0, 9, 12, 14, 18]) {
+      const at = day + hour * HOUR;
+      if (at <= now) continue;
+      if (isPeakAt(at) === wantPeak) return at;
+    }
+  }
+  return now + HOUR;
+}
+
+/**
+ * Start of the next off-peak *segment* (a fresh window, not the current one):
+ * while peak is running that is when this peak ends, while off-peak is running
+ * it is when the next peak ends.
+ */
+function nextOffStart(now) {
+  if (isPeakAt(now)) return nextRegimeAt(now, false);
+  return nextRegimeAt(nextRegimeAt(now, true), false);
+}
+
+/** Start of the continuous regime run that contains `now` (hour granularity). */
+function segmentStart(now) {
+  const peak = isPeakAt(now);
+  let at = hourStart(now);
+  for (let step = 0; step < 15 * 24; step += 1) {
+    const previous = at - HOUR;
+    if (isPeakAt(previous) !== peak) break;
+    at = previous;
+  }
+  return at;
+}
+
+function dayOffsetOf(at, now) {
+  return Math.round((dayStart(at) - dayStart(now)) / DAY);
+}
+
 function tierOf(model) {
   return typeof model === 'string' && /pro/i.test(model) ? 'pro' : 'flash';
 }
@@ -463,6 +503,8 @@ function buildSnapshot(sessionId, now) {
   prune(now);
   const peak = isPeakAt(now);
   const next = nextTransition(now);
+  const segStart = segmentStart(now);
+  const offStart = nextOffStart(now);
   const session = sessionView(sessionId);
   return {
     ok: true,
@@ -475,11 +517,24 @@ function buildSnapshot(sessionId, now) {
     regime: {
       peak,
       discount: peak ? 1 : 0.5,
+      segment: {
+        start: segStart,
+        clock: clockOf(segStart),
+        dayOffset: dayOffsetOf(segStart, now),
+        date: dayKeyOf(bjParts(segStart)),
+      },
+      nextOff: {
+        at: offStart,
+        clock: clockOf(offStart),
+        dayOffset: dayOffsetOf(offStart, now),
+        date: dayKeyOf(bjParts(offStart)),
+        inMs: Math.max(0, offStart - now),
+      },
       until: next.at,
       untilClock: clockOf(next.at),
       nextClock: clockOf(next.at),
       nextPeak: next.peak,
-      nextDayOffset: Math.round((dayStart(next.at) - dayStart(now)) / DAY),
+      nextDayOffset: dayOffsetOf(next.at, now),
       nextDate: dayKeyOf(bjParts(next.at)),
     },
     today: todayAggregate(now),
