@@ -8,11 +8,11 @@
   "author": "wang7",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/onfzi/dsh-plugin-usage-pulse.git"
+    "url": "git+https://github.com/hunyu-feng/dsh-plugin-usage-pulse.git"
   },
-  "homepage": "https://github.com/onfzi/dsh-plugin-usage-pulse#readme",
+  "homepage": "https://github.com/hunyu-feng/dsh-plugin-usage-pulse#readme",
   "bugs": {
-    "url": "https://github.com/onfzi/dsh-plugin-usage-pulse/issues"
+    "url": "https://github.com/hunyu-feng/dsh-plugin-usage-pulse/issues"
   },
   "keywords": [
     "dsh-plugin",

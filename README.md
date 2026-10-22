@@ -59,7 +59,7 @@ This repository is a DSH plugin bundle: `package.json` declares the `dsh.bundle`
 
 ```bash
 # once the entry is listed in the community catalog
-dsh plugin add onfzi/dsh-plugin-usage-pulse
+dsh plugin add hunyu-feng/dsh-plugin-usage-pulse
 ```
 
 For a local checkout, point the DSH plugin manager at the directory containing `package.json`
