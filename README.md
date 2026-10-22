@@ -58,6 +58,7 @@ This repository is a DSH plugin bundle: `package.json` declares the `dsh.bundle`
 `cordis.patch.yml` inserts the plugin, so it installs the same way as any other plugin.
 
 ```bash
+# once the entry is listed in the community catalog
 dsh plugin add onfzi/dsh-plugin-usage-pulse
 ```
 
